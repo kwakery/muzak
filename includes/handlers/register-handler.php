@@ -11,16 +11,11 @@ if (isset($_POST['registerBtn'])) { // Log in handler
 
   /* Create Account */
   $account = new Account();
-  $register = $account->register($firstName, $lastName, $email, $cEmail, $username, $password, $cPassword);
+  $errors = $account->register($firstName, $lastName, $email, $cEmail, $username, $password, $cPassword);
 
-  if (!empty($register))
-  {
-    foreach($register as $error)
-      echo("{$error}<br />");
-    die();
-
-  }
-
+  // If there were errors while validating inputs, print them
+  if (empty($errors))
+    header("Location: /index.php");
 }
 
 

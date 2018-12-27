@@ -15,4 +15,9 @@ function sanitizeStr($data) {
 
   return $data;
 }
+
+function getInput($name) {
+  if (isset($_POST[$name]))
+    return $_POST[$name];
+}
 ?>

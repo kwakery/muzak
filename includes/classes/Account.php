@@ -17,7 +17,6 @@ class Account {
 
     if (!empty($this->errors))
       return $this->errors;
-
   }
 
   private function validateFirstName($name) {

@@ -14,8 +14,11 @@ if (isset($_POST['registerBtn'])) { // Log in handler
   $errors = $user->register($firstName, $lastName, $email, $cEmail, $username, $password, $cPassword);
 
   // If there were errors while validating inputs, print them
-  if (empty($errors))
+  if (empty($errors)) {
+    $_SESSION['loggedin'] = true;
+    $_SESSION['user'] = $username;
     header("Location: /login.php");
+  }
 }
 
 

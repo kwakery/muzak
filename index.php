@@ -1,3 +1,7 @@
+<?php
+require("$_SERVER[DOCUMENT_ROOT]/../config.php");
+
+?>
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
   <head>

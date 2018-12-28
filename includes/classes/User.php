@@ -20,16 +20,20 @@ class User {
   }
 
   public function login($name, $password) {
-    $sql='SELECT username, password FROM users WHERE username = ? LIMIT 1';
-
-    $stmt = $conn->prepare($sql);
+    $query = 'SELECT * FROM users WHERE username = ? LIMIT 1';
+    $stmt = $this->conn->prepare($query);
     $stmt->bind_param('s', $name);
     $stmt->execute();
+    $result = $stmt->get_result();
 
-    echo $stmt->insert_id;
-    echo $stmt->affected_rows;
+    if ($result->num_rows < 1)
+      return false;
+
+    $user = $result->fetch_assoc();
+    $successful = password_verify($password, $user['password']);
 
     $stmt->close();
+    return $successful;
   }
 
   /* Validate and Add account to database */

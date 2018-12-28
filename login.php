@@ -1,4 +1,6 @@
 <?php
+  $result = true;
+
   require("$_SERVER[DOCUMENT_ROOT]/../config.php");
   require("includes/classes/User.php");
   require("includes/functions.php");
@@ -8,12 +10,13 @@
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
-    <title>Registration</title>
+    <title>Login</title>
   </head>
   <body>
     <div id="inputContainer">
-      <form id="loginFrm" action="register.php" method="post">
+      <form id="loginFrm" action="login.php" method="post">
         <h2>Login to your Account</h2>
+        <?php if (!$result) echo("<li><span class=\"errorMsg\">Incorrect username or password provided.</span><br /></li>\n"); ?>
         <p>
           <label for="username">Username:</label>
           <input type="text" id="username" name="username" placeholder="username" required>

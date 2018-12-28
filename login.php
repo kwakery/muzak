@@ -1,8 +1,8 @@
 <?php
-  include_once("includes/classes/Account.php");
-  include_once("includes/functions.php");
-  include("includes/handlers/login-handler.php");
-
+  require("$_SERVER[DOCUMENT_ROOT]/../config.php");
+  require("includes/classes/User.php");
+  require("includes/functions.php");
+  require("includes/handlers/login-handler.php");
 ?>
 <!DOCTYPE html>
 <html lang="en" dir="ltr">

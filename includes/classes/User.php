@@ -1,5 +1,5 @@
 <?php
-class Account {
+class User {
   private $errors; // Array containing errors if applicable
   private $conn; // MySQL Connection
 
@@ -17,6 +17,19 @@ class Account {
   public function __construct($conn) {
     $this->conn = $conn;
     $this->errors = array();
+  }
+
+  public function login($name, $password) {
+    $sql='SELECT username, password FROM users WHERE username = ? LIMIT 1';
+
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('s', $name);
+    $stmt->execute();
+
+    echo $stmt->insert_id;
+    echo $stmt->affected_rows;
+
+    $stmt->close();
   }
 
   /* Validate and Add account to database */
@@ -38,15 +51,11 @@ class Account {
   private function insert() {
     if ($this->hasErrors())
       return;
-
-    $query = "INSERT INTO users (username, password, name, lastname, email) VALUES (?, ?, ?, ?, ?)";
+    echo 'test';
+    $query = 'INSERT INTO users (username, password, name, lastname, email) VALUES (?, ?, ?, ?, ?)';
     $stmt = $this->conn->prepare($query);
     $stmt->bind_param("sssss", $this->username, $this->password, $this->firstname, $this->lastname, $this->email);
     $stmt->execute();
-
-    if (!$stmt)
-      array_push($this->errors, "Something went wrong with the registration. Please try again.");
-
     $stmt->close();
   }
 
@@ -56,6 +65,7 @@ class Account {
 
     if (!isBetween($name, $min, $max)) {
       array_push($this->errors, "Your first name must be between {$min} and {$max} characters.");
+      return;
     }
 
     $this->firstname = $name;
@@ -76,8 +86,10 @@ class Account {
     $min = 5;
     $max = 25;
 
-    if ($email != $cEmail)
-      array_push($this->errors, "Your emails do not match.");
+    if ($email != $cEmail) {
+      array_push($this->errors, 'Your emails do not match.');
+      return;
+    }
 
     if (!isBetween($email, $min, $max)) {
       array_push($this->errors, "Your email must be between {$min} and {$max} characters.");
@@ -85,22 +97,22 @@ class Account {
     }
 
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-      array_push($this->errors, "Please enter a valid email.");
+      array_push($this->errors, 'Please enter a valid email.');
       return;
     }
 
-    $query = "SELECT COUNT(*) FROM users WHERE email = ?";
+    $query = 'SELECT COUNT(*) FROM users WHERE email = ?';
     $stmt = $this->conn->prepare($query);
-    $stmt->bind_param("s", $this->email);
+    $stmt->bind_param("s", $email);
     $stmt->execute();
-    $stmt->close();
-    $count = $stmt->num_rows;
+    $count = $stmt->get_result()->fetch_row()[0];
     if ($count > 0) {
       array_push($this->errors, 'Please enter an email that hasn\'t already been used.');
       return;
     }
 
     $this->email = $email;
+    $stmt->close();
   }
 
   private function validateUsername($name) {
@@ -112,19 +124,18 @@ class Account {
       return;
     }
 
-    $query = "SELECT COUNT(*) FROM users WHERE username = ?";
+    $query = 'SELECT COUNT(*) FROM users WHERE username = ? LIMIT 1';
     $stmt = $this->conn->prepare($query);
-    $stmt->bind_param("s", $this->username);
+    $stmt->bind_param("s", $name);
     $stmt->execute();
-    $stmt->close();
-    $count = $stmt->num_rows;
+    $count = $stmt->get_result()->fetch_row()[0];
     if ($count > 0) {
-      var_dump($stmt);
       array_push($this->errors, 'Please enter a username that hasn\'t already been used.');
       return;
     }
 
     $this->username = $name;
+    $stmt->close();
   }
 
   private function validatePassword($pass, $cPass) {
@@ -132,7 +143,7 @@ class Account {
     $max = 14;
 
     if ($pass != $cPass) {
-      array_push($this->errors, "Your passwords do not match.");
+      array_push($this->errors, 'Your passwords do not match.');
       return;
     }
 
@@ -142,7 +153,7 @@ class Account {
     }
 
     if (preg_match('/[^A-Za-z0-9]/', $pass)) {
-      array_push($this->errors, "Your passwords contains illegal characters.");
+      array_push($this->errors, 'Your passwords contains illegal characters.');
       return;
     }
 

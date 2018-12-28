@@ -1,6 +1,6 @@
 <?php
   require("$_SERVER[DOCUMENT_ROOT]/../config.php");
-  require("includes/classes/Account.php");
+  require("includes/classes/User.php");
   require("includes/functions.php");
   require("includes/handlers/register-handler.php");
 ?>
@@ -21,7 +21,7 @@
 
               foreach($errors as $error)
                 echo("<li><span class=\"errorMsg\">{$error}</span><br /></li>\n");
-                
+
               echo "</ul>";
             }
           ?>

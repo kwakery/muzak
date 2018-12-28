@@ -10,12 +10,12 @@ if (isset($_POST['registerBtn'])) { // Log in handler
   $cPassword = sanitize($_POST['cpassword']);
 
   /* Create Account */
-  $account = new Account($conn);
-  $errors = $account->register($firstName, $lastName, $email, $cEmail, $username, $password, $cPassword);
+  $user = new User($conn);
+  $errors = $user->register($firstName, $lastName, $email, $cEmail, $username, $password, $cPassword);
 
   // If there were errors while validating inputs, print them
   if (empty($errors))
-    header("Location: /index.php");
+    header("Location: /login.php");
 }
 
 

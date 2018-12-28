@@ -1,8 +1,21 @@
 <?php
 class Account {
   private $errors; // Array containing errors if applicable
+  private $conn; // MySQL Connection
 
-  public function __construct() {
+  /* User details */
+  private $firstname;
+  private $lastname;
+  private $email;
+  private $username;
+  private $password; // hashed with bcrypt
+
+  private function hasErrors() {
+    return !empty($this->errors);
+  }
+
+  public function __construct($conn) {
+    $this->conn = $conn;
     $this->errors = array();
   }
 
@@ -15,24 +28,48 @@ class Account {
     $this->validateUsername($user);
     $this->validatePassword($pass, $cpass);
 
-    if (!empty($this->errors))
+    /* Attempt to insert data */
+    $this->insert();
+
+    if ($this->hasErrors())
       return $this->errors;
+  }
+
+  private function insert() {
+    if ($this->hasErrors())
+      return;
+
+    $query = "INSERT INTO users (username, password, name, lastname, email) VALUES (?, ?, ?, ?, ?)";
+    $stmt = $this->conn->prepare($query);
+    $stmt->bind_param("sssss", $this->username, $this->password, $this->firstname, $this->lastname, $this->email);
+    $stmt->execute();
+
+    if (!$stmt)
+      array_push($this->errors, "Something went wrong with the registration. Please try again.");
+
+    $stmt->close();
   }
 
   private function validateFirstName($name) {
     $min = 4;
     $max = 16;
 
-    if (strlen($name) < $min || strlen($name) > $max) // Make sure name is above minimum and lower than maximum
+    if (!isBetween($name, $min, $max)) {
       array_push($this->errors, "Your first name must be between {$min} and {$max} characters.");
+    }
+
+    $this->firstname = $name;
   }
 
   private function validateLastName($name) {
     $min = 4;
     $max = 16;
 
-    if (strlen($name) < $min || strlen($name) > $max) // Make sure name is above minimum and lower than maximum
+    if (!isBetween($name, $min, $max)) {
       array_push($this->errors, "Your last name must be between {$min} and {$max} characters.");
+    }
+
+    $this->lastname = $name;
   }
 
   private function validateEmail($email, $cEmail) {
@@ -42,7 +79,7 @@ class Account {
     if ($email != $cEmail)
       array_push($this->errors, "Your emails do not match.");
 
-    if (strlen($email) < $min || strlen($email) > $max) {// Make sure name is above minimum and lower than maximum
+    if (!isBetween($email, $min, $max)) {
       array_push($this->errors, "Your email must be between {$min} and {$max} characters.");
       return;
     }
@@ -52,20 +89,42 @@ class Account {
       return;
     }
 
-    // TODO: Check if email is unique
+    $query = "SELECT COUNT(*) FROM users WHERE email = ?";
+    $stmt = $this->conn->prepare($query);
+    $stmt->bind_param("s", $this->email);
+    $stmt->execute();
+    $stmt->close();
+    $count = $stmt->num_rows;
+    if ($count > 0) {
+      array_push($this->errors, 'Please enter an email that hasn\'t already been used.');
+      return;
+    }
 
+    $this->email = $email;
   }
 
-  private function validateUsername($user) {
+  private function validateUsername($name) {
     $min = 4;
     $max = 12;
 
-    if (strlen($user) < $min || strlen($user) > $max) { // Make sure name is above minimum and lower than maximum
+    if (!isBetween($name, $min, $max)) {
       array_push($this->errors, "Your username must be between {$min} and {$max} characters.");
       return;
     }
 
-    // TODO: Check if username is unique
+    $query = "SELECT COUNT(*) FROM users WHERE username = ?";
+    $stmt = $this->conn->prepare($query);
+    $stmt->bind_param("s", $this->username);
+    $stmt->execute();
+    $stmt->close();
+    $count = $stmt->num_rows;
+    if ($count > 0) {
+      var_dump($stmt);
+      array_push($this->errors, 'Please enter a username that hasn\'t already been used.');
+      return;
+    }
+
+    $this->username = $name;
   }
 
   private function validatePassword($pass, $cPass) {
@@ -77,7 +136,7 @@ class Account {
       return;
     }
 
-    if (strlen($pass) < $min || strlen($pass) > $max) { // Make sure name is above minimum and lower than maximum
+    if (!isBetween($pass, $min, $max)) {
       array_push($this->errors, "Your password must be between {$min} and {$max} characters.");
       return;
     }
@@ -86,6 +145,12 @@ class Account {
       array_push($this->errors, "Your passwords contains illegal characters.");
       return;
     }
+
+    $options = [
+        'cost' => 12,
+    ];
+
+    $this->password = password_hash($pass, PASSWORD_BCRYPT, $options);
   }
 }
 ?>

@@ -1,7 +1,8 @@
 <?php
-  require_once("includes/classes/Account.php");
-  require_once("includes/functions.php");
-  require_once("includes/handlers/register-handler.php");
+  require("$_SERVER[DOCUMENT_ROOT]/../config.php");
+  require("includes/classes/Account.php");
+  require("includes/functions.php");
+  require("includes/handlers/register-handler.php");
 ?>
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -17,8 +18,10 @@
             if (!empty($errors))
             {
               echo "<ul>\n";
+
               foreach($errors as $error)
                 echo("<li><span class=\"errorMsg\">{$error}</span><br /></li>\n");
+                
               echo "</ul>";
             }
           ?>
